@@ -1,8 +1,19 @@
 export type Analytic = {
-  summonerName: string;
-  summonerLevel: number;
-  masteryScore: number;
-  masteryChampions: MasteryChampion[];
+  summoner: {
+    summonerName: string;
+    summonerLevel: number;
+  };
+  championMastery: {
+    masteryScore: number;
+    masteryChampions: MasteryChampion[];
+  };
+  match?: {
+    totalGames: number;
+    totalQueuesGames: QueueGame[];
+    totalRolGames: RolGame[];
+    totalLaneGames: LaneGame[];
+    totalGamesPerChampion: GamesPerChampion[];
+  };
 };
 
 export type ChampionFiltered = {
@@ -17,4 +28,24 @@ export type MasteryChampion = {
   championLevel: number;
   championPoints: number;
   lastPlayed: Date;
+};
+
+export type QueueGame = {
+  queue: number | string;
+  total: number;
+};
+
+export type RolGame = {
+  role: number | string;
+  total: number;
+};
+
+export type LaneGame = {
+  lane: number | string;
+  total: number;
+};
+
+export type GamesPerChampion = {
+  champion: number | string;
+  total: number;
 };
