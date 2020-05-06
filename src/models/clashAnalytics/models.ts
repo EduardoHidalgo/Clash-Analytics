@@ -1,7 +1,8 @@
 export type Analytic = {
   summonerName: string;
   summonerLevel: number;
-  MasteryChampions: MasteryChampion[];
+  masteryScore: number;
+  masteryChampions: MasteryChampion[];
 };
 
 export type ChampionFiltered = {
@@ -15,4 +16,5 @@ export type MasteryChampion = {
   champion: string;
   championLevel: number;
   championPoints: number;
+  lastPlayed: Date;
 };

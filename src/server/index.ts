@@ -60,15 +60,16 @@ app.get("/api/", async (req, res) => {
   let masteryChampions: MasteryChampion[] = [];
 
   championMasteryDTO.forEach((mastery) => {
-    let ch = championsFiltered.filter((champ) => {
+    let championExists = championsFiltered.filter((champ) => {
       return champ.championId === mastery.championId;
     });
 
-    if (ch) {
+    if (championExists) {
       masteryChampions.push({
-        champion: ch[0].name,
+        champion: championExists[0].name,
         championLevel: mastery.championLevel,
         championPoints: mastery.championPoints,
+        lastPlayed: new Date(mastery.lastPlayTime),
       });
     } else console.log(`No existe un campeón con el id: ${mastery.championId}`);
   });
@@ -76,7 +77,8 @@ app.get("/api/", async (req, res) => {
   let analytic: Analytic = {
     summonerName: summonerName,
     summonerLevel: summonerDTO.summonerLevel,
-    MasteryChampions: masteryChampions,
+    masteryScore: masteryScore,
+    masteryChampions: masteryChampions,
   };
 
   res.send(analytic);
