@@ -25,7 +25,6 @@ export async function Analytics(
     props
   );
   let DataDragon: RiotAPI.DataDragon = new RiotAPI.DataDragon();
-
   let Match: RiotAPI.Match = new RiotAPI.Match(props);
 
   try {
@@ -217,6 +216,8 @@ export async function Analytics(
     totalGamesPerChampion.sort((a, b) => {
       return b.total - a.total;
     });
+
+    /* Construye el objeto de respuesta. */
 
     let analytic: Analytic = {
       summoner: {

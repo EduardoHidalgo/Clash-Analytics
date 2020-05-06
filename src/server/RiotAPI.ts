@@ -167,10 +167,12 @@ export module RiotAPI {
     GetMatchList = async (encryptedAccountId: string): Promise<MatchList> => {
       const queue420: RequestInfo = `${this.riotURL}/matchlists/by-account/${encryptedAccountId}?queue=420&season=13`;
       const queue440: RequestInfo = `${this.riotURL}/matchlists/by-account/${encryptedAccountId}?queue=440&season=13`;
+      const queue700: RequestInfo = `${this.riotURL}/matchlists/by-account/${encryptedAccountId}?queue=700&season=13`;
 
       return await Promise.all([
         this.GetMatchsByQueue(queue420),
         this.GetMatchsByQueue(queue440),
+        this.GetMatchsByQueue(queue700),
       ]).then((res) => {
         let matchList: MatchList = {
           matches: [],
@@ -179,7 +181,8 @@ export module RiotAPI {
 
         res.forEach((list) => {
           matchList.totalGames += list.totalGames;
-          list.matches.forEach((match) => matchList.matches.push(match));
+          if (list.matches.length > 0)
+            list.matches.forEach((match) => matchList.matches.push(match));
         });
 
         return matchList;

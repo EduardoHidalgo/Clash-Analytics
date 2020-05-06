@@ -3,9 +3,130 @@
 - ¿Cuáles son los campeones que ha jugado últimamente?
 - ¿Cuáles son los campeones con mayor puntos de maestría que tiene el jugador?
 
-### Match
+### MatchList
 - ¿Cuál es el total de partidas que ha jugado esta season?
 - ¿Cuál es el total de partidas Solo/Quo, Flex y Clash que ha jugado?
 - ¿Cuál es el total de partidas que ha jugado por cada rol? (diferente de lane)
 - ¿Cuál es el total de partidas que ha jugado por cada lane?
 - ¿Cuál es la frecuencia de partidas por campeón jugados esta season?
+
+### Unique Match
+
+- ¿Cuánto duró la partida?
+- ¿Ganó?
+
+- Promedio de stats de la partida en relación al campeón
+- Promedio de stats de la partida en relación a la linea
+- Promedio de stats de la partida en relación a premades
+
+- Frecuencia de primera sangre
+- Frecuencia de objetivos
+    - baron
+    - dragon
+    - heraldo
+    - torre
+    - inhibidor
+- Frecuencia de baneos
+
+##### Frecuencias
+- kills
+- deaths
+- assists
+- killing sprees
+- hecho
+- daño a campeones
+- daño a torres 
+- daño a objetivos 
+- visión
+- cc
+- daño recibido
+- oro ganado
+- torretas
+- inhibidores
+- total minions 
+- total minions neutrales
+- total minions jungla propia
+- total minions jungla enemiga
+
+##### complejos
+- Relación win/first kill
+- Relación win/first tower
+- Relación win/first herald
+- Relación win/first baron
+
+- Tendencia a robar jungla
+- Tendencia a perseguir objetivos
+    - torres
+    - inhibidores
+    - dragones
+    - barones
+    - heraldos
+
+
+##### stats del equipo ganador
+##### stats del equipo perdedor
+- Primera sangre
+- Primera torre
+- Primer inhibidor
+- Primer baron
+- Primer dragon
+- Primer heraldo
+- Total de tower kills
+- Total de inhibitor kills
+- Total de baron kills
+- Total de dragon kills
+- Total de herald kills
+
+##### stats de la partida
+- Bans
+
+##### Stats por jugador
+- kills
+- deaths
+- assists
+- killing sprees
+- longest time spent living
+- double kill
+- triple kill
+- quadra kill
+- unreal kill
+- total damage dealt
+- magic damage dealt
+- physical damage dealt
+- true damage dealt
+- totalDamageDealtToChampions
+- magicDamageDealtToChampions
+- physicalDamageDealtToChampions
+- trueDamageDealtToChampions
+- totalHeal
+- damageSelfMitigated
+- damageDealtToObjectives
+- damageDealtToTurrets
+- visionScore
+- timeCCingOthers
+- totalDamageTaken
+- magicalDamageTaken
+- physicalDamageTaken
+- trueDamageTaken
+- goldEarned
+- goldSpent
+- turretKills
+- inhibitorKills
+- totalMinionsKilled
+- neutralMinionsKilled
+- neutralMinionsKilledTeamJungle
+- neutralMinionsKilledEnemyJungle
+- totalTimeCrowdControlDealt
+- champLevel
+- visionWardsBoughtInGame
+- sightWardsBoughtInGame
+- wardsPlaced
+- wardsKilled
+- firstBloodKill
+- firstBloodAssist
+- firstTowerKill
+- firstTowerAssist
+- firstInhibitorKill
+- firstInhibitorAssist
+- role
+- lane
