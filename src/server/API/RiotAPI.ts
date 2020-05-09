@@ -82,7 +82,7 @@ export module RiotAPI {
    *  @see https://developer.riotgames.com/apis#match-v4
    */
   export class Match {
-    private delay: number = 3000;
+    private delay: number = 4000;
     counterAPI: number;
 
     private apiKey: string;
@@ -176,7 +176,7 @@ export module RiotAPI {
         if (pending % 10 == 0)
           console.log(colors.green(`Pending matches: ${pending}`));
 
-        this.Sleep(this.delay);
+        await this.Sleep(this.delay);
         requestInfo = `${this.riotURL}/matches/${matchIds[i]}`;
         let match = await Fetch<MatchDTO>(requestInfo, "GET", this.apiKey);
 
