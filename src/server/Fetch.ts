@@ -1,3 +1,4 @@
+var colors = require("colors/safe");
 import fetch, { RequestInfo, RequestInit, Response } from "node-fetch";
 
 type Methods = "GET" | "POST" | "PUT" | "DELETE";
@@ -22,7 +23,15 @@ export async function Fetch<T>(
   };
 
   return (await fetch(requestInfo, requestInit)
-    .then((res: Response) => res.json())
+    .then((res: Response) => {
+      if (!res.ok) {
+        console.log(
+          colors.red(`endpoint rejected, code ${res.status}: ${requestInfo}`)
+        );
+      }
+
+      return res.json();
+    })
     .then((res) => res)
     .catch((error) => {
       console.log(error);

@@ -1,6 +1,7 @@
 import express from "express";
 import { Analytic } from "src/models/clashAnalytics/models";
-import { Analytics } from "./Analytics";
+import { Analytics } from "./Controllers/Analytics";
+import fs from "fs";
 
 var app: express.Application = express();
 
@@ -9,13 +10,16 @@ app.get("/api/analytic", async (req, res) => {
   const summonerName = req.query.summonerName as string;
   const apiKey = req.query.apiKey as string;
 
-  let analytic: Analytic | null = await Analytics(
-    apiKey,
-    platform,
-    summonerName
-  );
+  let analytics: Analytics = new Analytics(apiKey, platform, summonerName);
 
-  if (analytic) res.send(analytic);
+  let analytic: Analytic = await analytics.GetAnalytics();
+
+  /* Guarda el archivo en formato json. */
+
+  let json = JSON.stringify(analytic);
+  fs.writeFile("analytics.json", json, "utf8", () => {});
+
+  if (analytic) res.send("Process done.");
   else res.status(400).send("Something goes wrong.");
 });
 

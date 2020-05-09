@@ -1,73 +1,54 @@
-import { RiotAPI } from "./RiotAPI";
+import { RiotAPI, RiotProps } from "../API/RiotAPI";
+import { QueueId } from "src/models/dataDragon/Queue";
 import { SummonerDTO } from "src/models/summoner/SummonerDTO";
-import { ChampionMasteryDTO } from "../models/championMastery/ChampionMasteryDTO";
-import { Champions } from "../models/dataDragon/Champion";
 import {
+  ChampionFiltered,
   ChampionsFiltered,
+  GamesList,
+} from "../../models/clashAnalytics/models";
+import {
   Analytic,
+  GamesPerChampion,
+  LaneGame,
   MasteryChampion,
   QueueGame,
   RolGame,
-  LaneGame,
-  GamesPerChampion,
 } from "src/models/clashAnalytics/models";
-import { Queue } from "src/models/dataDragon/Queue";
 
-export async function Analytics(
-  apiKey: string,
-  platform: string,
-  summonerName: string
-): Promise<Analytic | null> {
-  const props = { apiKey, platform, summonerName };
+/** Clase encargada de realizar todos los procesos de Analytics. Consume las
+ * peticiones de RiotAPI y convierte los datos obtenidos a nuevos modelos.
+ */
+export class Analytics {
+  props: RiotProps;
 
-  let Summoner: RiotAPI.Summoner = new RiotAPI.Summoner(props);
-  let ChampionMastery: RiotAPI.ChampionMastery = new RiotAPI.ChampionMastery(
-    props
-  );
-  let DataDragon: RiotAPI.DataDragon = new RiotAPI.DataDragon();
-  let Match: RiotAPI.Match = new RiotAPI.Match(props);
+  DataDragon: RiotAPI.DataDragon;
+  ChampionMastery: RiotAPI.ChampionMastery;
+  Match: RiotAPI.Match;
+  Summoner: RiotAPI.Summoner;
 
-  try {
-    /* Summoner */
-    const summonerDTO: SummonerDTO = await Summoner.GetSummoner().catch(
-      (error) => {
-        throw new Error(error);
-      }
-    );
+  constructor(apiKey: string, platform: string, summonerName: string) {
+    this.props = { apiKey, platform, summonerName };
 
-    /* ChampionMastery */
+    this.DataDragon = new RiotAPI.DataDragon();
+    this.ChampionMastery = new RiotAPI.ChampionMastery(this.props);
+    this.Match = new RiotAPI.Match(this.props);
+    this.Summoner = new RiotAPI.Summoner(this.props);
+  }
 
-    const {
-      championMasteryDTO,
-      masteryScore,
-      champions,
-      queues,
-    }: {
-      championMasteryDTO: ChampionMasteryDTO[];
-      masteryScore: number;
-      champions: Champions;
-      queues: Queue[];
-    } = await Promise.all([
-      ChampionMastery.GetAllChampionMasteries(summonerDTO.id),
-      ChampionMastery.GetMasteryScore(summonerDTO.id),
-      DataDragon.GetChampions(),
-      DataDragon.GetQueuesIds(),
-    ])
-      .then((result) => {
-        return {
-          championMasteryDTO: result[0],
-          masteryScore: result[1],
-          champions: result[2],
-          queues: result[3],
-        };
-      })
-      .catch((error) => {
-        throw new Error(error);
-      });
+  private GetSummoner = async (): Promise<SummonerDTO> => {
+    return await this.Summoner.GetSummoner();
+  };
 
+  private GetDataDragon = async (): Promise<{
+    championsFiltered: ChampionsFiltered;
+    queuesId: QueueId[];
+  }> => {
+    const champions = await this.DataDragon.GetChampions();
+    const queuesId = await this.DataDragon.GetQueuesIds();
+
+    /* Procesa los campeones y los convierte en otro modelo. */
     let championsFiltered: ChampionsFiltered = [];
-
-    const objectArray = Object.entries(champions.data);
+    let objectArray = Object.entries(champions.data);
 
     objectArray.forEach(([key, value]) =>
       championsFiltered.push({
@@ -76,8 +57,23 @@ export async function Analytics(
       })
     );
 
+    return { championsFiltered, queuesId };
+  };
+
+  private GetMastery = async (
+    summonerDTO: SummonerDTO,
+    championsFiltered: ChampionFiltered[]
+  ) => {
+    const championMasteryDTO = await this.ChampionMastery.GetAllChampionMasteries(
+      summonerDTO.id
+    );
+    const masteryScore = await this.ChampionMastery.GetMasteryScore(
+      summonerDTO.id
+    );
+
     let masteryChampions: MasteryChampion[] = [];
 
+    /* Convierte la data de championMasteryDTO a MasteryChampion. */
     championMasteryDTO.forEach((mastery) => {
       let championExists = championsFiltered.filter((champ) => {
         return champ.championId === mastery.championId;
@@ -94,14 +90,35 @@ export async function Analytics(
         console.log(`No existe un campeón con el id: ${mastery.championId}`);
     });
 
-    /* Match */
+    return { masteryChampions, masteryScore };
+  };
 
-    let matchList = await Match.GetMatchList(summonerDTO.accountId);
+  private GetMatchList = async (
+    summonerDTO: SummonerDTO,
+    championsFiltered: ChampionFiltered[],
+    queuesId: QueueId[],
+    masteryChampions: MasteryChampion[]
+  ) => {
+    let matchList = await this.Match.GetMatchList(summonerDTO.accountId);
 
+    let gamesList: GamesList = [];
+    let totalGames = matchList.totalGames;
     let totalQueuesGames: QueueGame[] = [];
     let totalRolGames: RolGame[] = [];
     let totalLaneGames: LaneGame[] = [];
     let totalGamesPerChampion: GamesPerChampion[] = [];
+
+    /* Obtiene todos los id's de cada partida. */
+    matchList.matches.forEach((match) => {
+      // if (match.queue == 700) gamesList.push(match.gameId);
+      gamesList.push(match.gameId);
+    });
+
+    /* Remueve el conteo de campeones jugados menores al 2% del total. */
+    let cap: number = (matchList.totalGames / 100) * 2;
+    totalGamesPerChampion = totalGamesPerChampion.filter(
+      (game) => game.total >= cap
+    );
 
     /* Realiza el conteo de cada partida obtenida. */
     matchList.matches.forEach((match) => {
@@ -164,7 +181,7 @@ export async function Analytics(
 
     /* Reemplaza el id de cada queue por el nombre de la queue. */
     totalQueuesGames.forEach((queueGame, index) => {
-      let queueExists = queues.filter((queue) => {
+      let queueExists = queuesId.filter((queue) => {
         return queue.queueId === queueGame.queue;
       });
 
@@ -193,12 +210,6 @@ export async function Analytics(
       (mastery) => mastery.championLevel >= 5
     );
 
-    /* Remueve el conteo de campeones jugados menores al 2% del total. */
-    let cap: number = (matchList.totalGames / 100) * 2;
-    totalGamesPerChampion = totalGamesPerChampion.filter(
-      (game) => game.total >= cap
-    );
-
     /* Ordena las maestrías. */
     masteryChampions.sort((a, b) => {
       return b.championPoints - a.championPoints;
@@ -217,11 +228,57 @@ export async function Analytics(
       return b.total - a.total;
     });
 
-    /* Construye el objeto de respuesta. */
+    return {
+      gamesList,
+      totalGames,
+      totalQueuesGames,
+      totalRolGames,
+      totalLaneGames,
+      totalGamesPerChampion,
+    };
+  };
 
+  GetMatches = async (gamesList: GamesList) => {
+    let matches = await this.Match.GetMatch(gamesList);
+
+    return matches;
+  };
+
+  GetAnalytics = async () => {
+    let summonerDTO: SummonerDTO = await this.GetSummoner();
+    let { championsFiltered, queuesId } = await this.GetDataDragon();
+    let { masteryChampions, masteryScore } = await this.GetMastery(
+      summonerDTO,
+      championsFiltered
+    );
+    let {
+      gamesList,
+      totalGames,
+      totalQueuesGames,
+      totalRolGames,
+      totalLaneGames,
+      totalGamesPerChampion,
+    } = await this.GetMatchList(
+      summonerDTO,
+      championsFiltered,
+      queuesId,
+      masteryChampions
+    );
+
+    let counter: number = 0;
+
+    counter += this.ChampionMastery.counterAPI;
+    counter += this.Match.counterAPI;
+    counter += this.Summoner.counterAPI;
+
+    console.log("Peticiones realizadas: " + counter);
+
+    let matches = await this.GetMatches(gamesList);
+
+    /* Construye el objeto de respuesta. */
     let analytic: Analytic = {
       summoner: {
-        summonerName,
+        summonerName: this.props.summonerName,
         summonerLevel: summonerDTO.summonerLevel,
       },
       championMastery: {
@@ -229,16 +286,15 @@ export async function Analytics(
         masteryChampions,
       },
       match: {
-        totalGames: matchList.totalGames,
+        totalGames,
         totalQueuesGames,
         totalRolGames,
         totalLaneGames,
         totalGamesPerChampion,
       },
+      matches,
     };
+
     return analytic;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
+  };
 }

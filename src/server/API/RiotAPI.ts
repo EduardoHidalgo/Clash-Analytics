@@ -1,10 +1,12 @@
+var colors = require("colors/safe");
 import { RequestInfo } from "node-fetch";
-import { Fetch } from "./Fetch";
+import { Fetch } from "../Fetch";
 import { SummonerDTO } from "src/models/summoner/SummonerDTO";
 import { ChampionMasteryDTO } from "src/models/championMastery/ChampionMasteryDTO";
 import { Champions } from "src/models/dataDragon/Champion";
 import { MatchListDTO, MatchList } from "src/models/match/MatchListDTO";
-import { Queue } from "src/models/dataDragon/Queue";
+import { QueueId } from "src/models/dataDragon/Queue";
+import { MatchDTO } from "src/models/match/MatchDTO";
 
 export type RiotProps = {
   apiKey: string;
@@ -20,12 +22,15 @@ export module RiotAPI {
    * @see https://developer.riotgames.com/apis#champion-mastery-v4
    */
   export class ChampionMastery {
+    counterAPI: number;
+
     private apiKey: string;
     private platform: string;
     private summonerName: string;
     private riotURL: string;
 
     constructor(props: RiotProps) {
+      this.counterAPI = 0;
       this.apiKey = props.apiKey;
       this.platform = props.platform;
       this.summonerName = props.summonerName;
@@ -38,6 +43,7 @@ export module RiotAPI {
      * @see https://developer.riotgames.com/apis#champion-mastery-v4/GET_getAllChampionMasteries
      */
     GetAllChampionMasteries = (encryptedSummonerId: string) => {
+      this.counterAPI += 1;
       const requestInfo: RequestInfo = `${this.riotURL}/champion-masteries/by-summoner/${encryptedSummonerId}`;
       return Fetch<ChampionMasteryDTO[]>(requestInfo, "GET", this.apiKey);
     };
@@ -48,6 +54,7 @@ export module RiotAPI {
      * @see https://developer.riotgames.com/apis#champion-mastery-v4/GET_getChampionMasteryScore
      */
     GetMasteryScore = (encryptedSummonerId: string) => {
+      this.counterAPI += 1;
       const requestInfo: RequestInfo = `${this.riotURL}/scores/by-summoner/${encryptedSummonerId}`;
       return Fetch<number>(requestInfo, "GET", this.apiKey);
     };
@@ -67,7 +74,7 @@ export module RiotAPI {
 
     GetQueuesIds = () => {
       const requestInfo: RequestInfo = `http://static.developer.riotgames.com/docs/lol/queues.json`;
-      return Fetch<Queue[]>(requestInfo, "GET");
+      return Fetch<QueueId[]>(requestInfo, "GET");
     };
   }
 
@@ -75,15 +82,24 @@ export module RiotAPI {
    *  @see https://developer.riotgames.com/apis#match-v4
    */
   export class Match {
+    private delay: number = 3000;
+    counterAPI: number;
+
     private apiKey: string;
     private platform: string;
     private riotURL: string;
 
     constructor(props: RiotProps) {
+      this.counterAPI = 0;
+
       this.apiKey = props.apiKey;
       this.platform = props.platform;
       this.riotURL = `https://${this.platform}.api.riotgames.com/lol/match/v4`;
     }
+
+    private Sleep = (ms: number) => {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    };
 
     private AdditionalMatchRequest = (beginIndex: number, endIndex: number) => {
       return `&beginIndex=${beginIndex}&endIndex=${endIndex}`;
@@ -119,6 +135,7 @@ export module RiotAPI {
           const url: RequestInfo =
             requestInfo + this.AdditionalMatchRequest(beginIndex, endIndex);
 
+          this.counterAPI += 1;
           Promises.push(Fetch<MatchListDTO>(url, "GET", this.apiKey));
         }
 
@@ -134,11 +151,40 @@ export module RiotAPI {
     };
 
     private GetMatchsByQueue = async (requestInfo: RequestInfo) => {
+      this.counterAPI += 1;
       return Fetch<MatchListDTO>(requestInfo, "GET", this.apiKey).then(
         async (res) => {
           return await this.GetAdditionalMatchs(requestInfo, res);
         }
       );
+    };
+
+    /** Get match by match ID.
+     *
+     * @see https://developer.riotgames.com/apis#match-v4/GET_getMatch
+     */
+    GetMatch = async (matchIds: number[]): Promise<MatchDTO[]> => {
+      let requestInfo: RequestInfo = "";
+
+      let matches: MatchDTO[] = [];
+
+      let pending: number = matchIds.length;
+      for (let i = 0; i < matchIds.length; i++) {
+        this.counterAPI += 1;
+        pending -= 1;
+
+        if (pending % 10 == 0)
+          console.log(colors.green(`Pending matches: ${pending}`));
+
+        this.Sleep(this.delay);
+        requestInfo = `${this.riotURL}/matches/${matchIds[i]}`;
+        let match = await Fetch<MatchDTO>(requestInfo, "GET", this.apiKey);
+
+        console.log(`${this.riotURL}matches/${matchIds[i]}`);
+        matches.push(match);
+      }
+
+      return matches;
     };
 
     /** Get matchlist for games played on given account ID and platform ID and
@@ -194,12 +240,16 @@ export module RiotAPI {
    * @see https://developer.riotgames.com/apis#summoner-v4
    */
   export class Summoner {
+    counterAPI: number;
+
     private apiKey: string;
     private platform: string;
     private summonerName: string;
     private riotURL: string;
 
     constructor(props: RiotProps) {
+      this.counterAPI = 0;
+
       this.apiKey = props.apiKey;
       this.platform = props.platform;
       this.summonerName = props.summonerName;
@@ -210,6 +260,7 @@ export module RiotAPI {
      * @see https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
      */
     GetSummoner = () => {
+      this.counterAPI += 1;
       const requestInfo: RequestInfo = `${this.riotURL}/by-name/${this.summonerName}`;
       return Fetch<SummonerDTO>(requestInfo, "GET", this.apiKey);
     };

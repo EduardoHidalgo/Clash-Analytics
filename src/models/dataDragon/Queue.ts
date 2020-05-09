@@ -1,4 +1,4 @@
-export type Queue = {
+export type QueueId = {
   queueId: number;
   map: string;
   description: string;

@@ -1,3 +1,5 @@
+import { MatchDTO } from "../match/MatchDTO";
+
 export type Analytic = {
   summoner: {
     summonerName: string;
@@ -14,6 +16,7 @@ export type Analytic = {
     totalLaneGames: LaneGame[];
     totalGamesPerChampion: GamesPerChampion[];
   };
+  matches: MatchDTO[];
 };
 
 export type ChampionFiltered = {
@@ -49,3 +52,5 @@ export type GamesPerChampion = {
   champion: number | string;
   total: number;
 };
+
+export type GamesList = number[];
