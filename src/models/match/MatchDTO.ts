@@ -16,7 +16,7 @@ export type MatchDTO = {
   queueId: number;
 
   /** Please refer to the Game Constants documentation. */
-  gameType: string;
+  // gameType: string;
 
   /** Match duration in seconds. */
   gameDuration: number;
@@ -25,24 +25,24 @@ export type MatchDTO = {
   teams: TeamStatsDTO[];
 
   /** Platform where the match was played. */
-  platformId: string;
+  // platformId: string;
 
   /** Designates the timestamp when champion select ended and the loading screen
    * appeared, NOT when the game timer was at 0:00. */
   gameCreation: number;
 
   /** Please refer to the Game Constants documentation. */
-  seasonId: number;
+  // seasonId: number;
 
   /** The major.minor version typically indicates the patch the match was played
    * on. */
-  gameVersion: string;
+  // gameVersion: string;
 
   /** Please refer to the Game Constants documentation. */
-  mapId: number;
+  // mapId: number;
 
   /** Please refer to the Game Constants documentation. */
-  gameMode: string;
+  // gameMode: string;
 
   /** Participant information. */
   participants: ParticipantDTO[];

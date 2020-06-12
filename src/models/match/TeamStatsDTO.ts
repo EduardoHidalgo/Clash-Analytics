@@ -24,7 +24,7 @@ export type TeamStatsDTO = {
   firstDragon: boolean;
 
   /** For Dominion matches, specifies the points the team had at game end. */
-  dominionVictoryScore: number;
+  // dominionVictoryScore: number;
 
   /** Number of times the team killed Dragon. */
   dragonKills: number;
@@ -36,7 +36,7 @@ export type TeamStatsDTO = {
   firstTower: boolean;
 
   /** Number of times the team killed Vilemaw. */
-  vilemawKills: number;
+  // vilemawKills: number;
 
   /** Flag indicating whether or not the team scored the first Rift Herald
    * kill. */

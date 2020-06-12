@@ -14,6 +14,7 @@ import {
   QueueGame,
   RolGame,
 } from "src/models/clashAnalytics/models";
+import { MatchDTO } from "src/models/match/MatchDTO";
 
 /** Clase encargada de realizar todos los procesos de Analytics. Consume las
  * peticiones de RiotAPI y convierte los datos obtenidos a nuevos modelos.
@@ -243,6 +244,8 @@ export class Analytics {
 
     return matches;
   };
+
+  ProcessMatches = async (matches: MatchDTO[]) => {};
 
   GetAnalytics = async () => {
     let summonerDTO: SummonerDTO = await this.GetSummoner();

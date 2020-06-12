@@ -5,6 +5,7 @@ import { MasteryDTO } from "./MasteryDTO";
 
 export type ParticipantDTO = {
   participantId: number;
+
   championId: number;
 
   /** List of legacy Rune information. Not included for matches played with
